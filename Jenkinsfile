@@ -30,17 +30,17 @@
             }
         }
 
-      stage("SonarQube") {
+    stage('SonarQube') {
     steps {
         withSonarQubeEnv('sonarqube-server') {
-            sh """
-            sonar-scanner \
+            sh '''
+            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
             -Dsonar.projectKey=Ncodeit \
             -Dsonar.projectName=Ncodeit \
             -Dsonar.projectVersion=2.0 \
             -Dsonar.sources=src \
             -Dsonar.java.binaries=target/classes
-            """
+            '''
         }
     }
 }
