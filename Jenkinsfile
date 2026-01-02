@@ -10,8 +10,8 @@
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "44.211.69.235:8081"
         NEXUS_REPOSITORY = "pipe-snapshots"
-        NEXUS_CREDENTIAL_ID = "Nexus-server"
-        SCANNER_HOME = tool 'SonarScanner'
+        NEXUS_CREDENTIAL_ID = "Nexus-user"
+        SCANNER_HOME = tool 'sonar-scanner'
 
         // Slack details (already configured in Jenkins → Configure System → Slack)
         SLACK_CHANNEL = "#jenkins-integration"
