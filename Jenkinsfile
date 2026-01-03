@@ -11,7 +11,9 @@
 
         stage('Maven Compilation') {
             def mvnHome = tool 'MVN_HOME'
-            sh "${mvnHome}/bin/mvn clean install"
+            sh """
+            ${mvnHome}/bin/mvn clean install
+            """
         }
 
         stage('SonarQube Integration') {
@@ -34,14 +36,14 @@
                 nexusVersion: 'nexus3',
                 protocol: 'http',
                 nexusUrl: '13.221.106.196:8081',
-                groupId: 'in.javahome',
-                version: '0.1',
                 repository: 'hiring-app',
                 credentialsId: 'nexus-user',
+                groupId: 'in.javahome',
+                version: '8-SNAPSHOT',
                 artifacts: [[
-                    artifactId: 'hiring',
+                    artifactId: 'SimpleCustomerApp',
                     classifier: '',
-                    file: 'target/*.war',
+                    file: 'target/SimpleCustomerApp-8-SNAPSHOT.war',
                     type: 'war'
                 ]]
             )
@@ -54,8 +56,8 @@
                     url: 'http://44.204.98.178:8080'
                 )
             ],
-            contextPath: 'hiring',
-            war: 'target/*.war'
+            contextPath: 'SimpleCustomerApp',
+            war: 'target/SimpleCustomerApp-8-SNAPSHOT.war'
         }
 
         stage('Slack Notification') {
