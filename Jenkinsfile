@@ -1,7 +1,9 @@
- node {
+node {
 
     def GIT_URL    = 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
     def GIT_BRANCH = 'feature1'
+
+    def WAR_FILE = ""
 
     try {
 
@@ -14,6 +16,15 @@
             sh """
             ${mvnHome}/bin/mvn clean install
             """
+        }
+
+        stage('Detect WAR File') {
+            WAR_FILE = sh(
+                script: "ls target/*.war | head -n 1",
+                returnStdout: true
+            ).trim()
+
+            echo "Detected WAR: ${WAR_FILE}"
         }
 
         stage('SonarQube Integration') {
@@ -39,11 +50,11 @@
                 repository: 'hiring-app',
                 credentialsId: 'nexus-user',
                 groupId: 'in.javahome',
-                version: '8-SNAPSHOT',
+                version: env.BUILD_NUMBER,
                 artifacts: [[
                     artifactId: 'SimpleCustomerApp',
                     classifier: '',
-                    file: 'target/SimpleCustomerApp-8-SNAPSHOT.war',
+                    file: WAR_FILE,
                     type: 'war'
                 ]]
             )
@@ -57,7 +68,7 @@
                 )
             ],
             contextPath: 'SimpleCustomerApp',
-            war: 'target/SimpleCustomerApp-8-SNAPSHOT.war'
+            war: WAR_FILE
         }
 
         stage('Slack Notification') {
@@ -79,4 +90,3 @@
         throw err
     }
 }
-
