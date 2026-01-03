@@ -1,4 +1,4 @@
-node {
+ node {
 
     def GIT_URL    = 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
     def GIT_BRANCH = 'feature1'
@@ -41,7 +41,7 @@ node {
                 artifacts: [[
                     artifactId: 'hiring',
                     classifier: '',
-                    file: 'target/SimpleCustomerApp-6-SNAPSHOT.war',
+                    file: 'target/*.war',
                     type: 'war'
                 ]]
             )
@@ -55,7 +55,7 @@ node {
                 )
             ],
             contextPath: 'hiring',
-            war: 'target/SimpleCustomerApp-6-SNAPSHOT.war'
+            war: 'target/*.war'
         }
 
         stage('Slack Notification') {
@@ -77,3 +77,4 @@ node {
         throw err
     }
 }
+
