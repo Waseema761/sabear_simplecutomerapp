@@ -9,9 +9,9 @@ node {
             git branch: GIT_BRANCH, url: GIT_URL
         }
 
-       stage('SonarQube Integration') {
+ stage('SonarQube Integration') {
 
-    def scannerHome = tool 'sonar-scanner1'
+    def scannerHome = tool 'sonar_scanner'
 
     withSonarQubeEnv('sonarqube-server1') {
         sh """
