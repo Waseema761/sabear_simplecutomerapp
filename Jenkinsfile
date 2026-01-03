@@ -10,14 +10,17 @@ node {
         }
 
         stage('SonarQube Integration') {
+
+            def scannerHome = tool 'sonar-scanner'
+
             withSonarQubeEnv('sonarqube-server1') {
-                sh '''
-                sonar-scanner \
+                sh """
+                ${scannerHome}/bin/sonar-scanner \
                 -Dsonar.projectKey=Sabear \
                 -Dsonar.projectName=Sabear \
                 -Dsonar.projectVersion=1.0 \
                 -Dsonar.sources=src
-                '''
+                """
             }
         }
 
@@ -73,3 +76,4 @@ node {
         throw err
     }
 }
+
