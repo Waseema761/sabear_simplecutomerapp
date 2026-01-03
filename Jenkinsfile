@@ -1,6 +1,6 @@
- node {
+node {
 
-    def GIT_URL = 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
+    def GIT_URL    = 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
     def GIT_BRANCH = 'feature1'
 
     try {
@@ -24,7 +24,7 @@
                 -Dsonar.projectName=Sabear \
                 -Dsonar.projectVersion=1.0 \
                 -Dsonar.sources=src \
-                -Dsonar.java.binaries=target/classes
+                -Dsonar.java.binaries=target/**/WEB-INF/classes
                 """
             }
         }
@@ -41,7 +41,7 @@
                 artifacts: [[
                     artifactId: 'hiring',
                     classifier: '',
-                    file: 'target/hiring.war',
+                    file: 'target/SimpleCustomerApp-6-SNAPSHOT.war',
                     type: 'war'
                 ]]
             )
@@ -55,14 +55,14 @@
                 )
             ],
             contextPath: 'hiring',
-            war: 'target/hiring.war'
+            war: 'target/SimpleCustomerApp-6-SNAPSHOT.war'
         }
 
         stage('Slack Notification') {
             slackSend(
                 channel: '#jenkins-integration',
                 color: 'good',
-                message: "✅ Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                message: "✅ BUILD SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
             )
         }
 
@@ -71,10 +71,9 @@
         slackSend(
             channel: '#jenkins-integration',
             color: 'danger',
-            message: "❌ Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+            message: "❌ BUILD FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
         )
 
         throw err
     }
 }
-
