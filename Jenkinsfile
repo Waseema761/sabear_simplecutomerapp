@@ -1,4 +1,4 @@
-node {
+ node {
 
     def GIT_URL = 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
     def GIT_BRANCH = 'feature1'
@@ -10,11 +10,11 @@ node {
         }
 
         stage('Maven Compilation') {
-            sh 'mvn clean install'
+            def mvnHome = tool 'MVN_HOME'
+            sh "${mvnHome}/bin/mvn clean install"
         }
 
         stage('SonarQube Integration') {
-
             def scannerHome = tool 'sonar_scanner'
 
             withSonarQubeEnv('sonarqube-server1') {
