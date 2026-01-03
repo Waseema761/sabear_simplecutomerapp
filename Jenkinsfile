@@ -9,20 +9,21 @@ node {
             git branch: GIT_BRANCH, url: GIT_URL
         }
 
-        stage('SonarQube Integration') {
+       stage('SonarQube Integration') {
 
-            def scannerHome = tool 'sonar-scanner'
+    def scannerHome = tool 'sonar-scanner1'
 
-            withSonarQubeEnv('sonarqube-server1') {
-                sh """
-                ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=Sabear \
-                -Dsonar.projectName=Sabear \
-                -Dsonar.projectVersion=1.0 \
-                -Dsonar.sources=src
-                """
-            }
-        }
+    withSonarQubeEnv('sonarqube-server1') {
+        sh """
+        ${scannerHome}/bin/sonar-scanner \
+        -Dsonar.projectKey=Sabear \
+        -Dsonar.projectName=Sabear \
+        -Dsonar.projectVersion=1.0 \
+        -Dsonar.sources=src
+        """
+    }
+}
+
 
         stage('Maven Compilation') {
             sh 'mvn clean install'
