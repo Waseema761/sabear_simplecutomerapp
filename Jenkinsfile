@@ -6,6 +6,8 @@ pipeline {
     }
 
     environment {
+        NEXUS_VERSION = "nexus3"
+        NEXUS_PROTOCOL = "http"
         NEXUS_URL = "13.59.148.180:8081"
         NEXUS_REPOSITORY = "hiring-app-snapshot"
         NEXUS_CREDENTIAL_ID = "nexus-creds"
@@ -48,47 +50,47 @@ pipeline {
             }
         }
 
-       stage("Publish Artifact to Nexus") {
-    steps {
-        script {
+        stage("Publish Artifact to Nexus") {
+            steps {
+                script {
 
-            def pom = readMavenPom file: "pom.xml"
-            def files = findFiles(glob: "target/*.${pom.packaging}")
+                    def pom = readMavenPom file: "pom.xml"
+                    def files = findFiles(glob: "target/*.${pom.packaging}")
 
-            if (files.length > 0) {
+                    if (files.length > 0) {
 
-                def artifactPath = files[0].path
+                        def artifactPath = files[0].path
 
-                nexusArtifactUploader(
-                    nexusVersion: "nexus3",
-                    protocol: "http",
-                    nexusUrl: "13.59.148.180:8081",
-                    groupId: pom.groupId,
-                    version: pom.version,
-                    repository: "hiring-app",
-                    credentialsId: "nexus-creds",
-                    artifacts: [
-                        [
-                            artifactId: pom.artifactId,
-                            classifier: '',
-                            file: artifactPath,
-                            type: pom.packaging
-                        ]
-                    ]
-                )
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: pom.groupId,
+                            version: pom.version,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                [
+                                    artifactId: pom.artifactId,
+                                    classifier: '',
+                                    file: artifactPath,
+                                    type: pom.packaging
+                                ]
+                            ]
+                        )
 
-                echo "Artifact uploaded successfully!"
+                        echo "Artifact uploaded successfully to Nexus!"
 
-            } else {
-                error "No artifact found in target folder!"
+                    } else {
+                        error "No artifact found in target folder!"
+                    }
+                }
             }
         }
     }
-}
-
-    }
 
     post {
+
         success {
             echo "Pipeline Completed Successfully"
         }
