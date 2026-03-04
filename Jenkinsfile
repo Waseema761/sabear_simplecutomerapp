@@ -1,123 +1,97 @@
-pipeline {
+ppipeline {
     agent any
 
     tools {
-        maven 'MVN_HOME'
+        maven "maven"
     }
 
     environment {
-        NEXUS_VERSION        = "nexus3"
-        NEXUS_PROTOCOL       = "http"
-        NEXUS_URL            = "44.211.69.235:8081"
-        NEXUS_REPOSITORY     = "pipe-snapshots"
-        NEXUS_CREDENTIAL_ID  = "nexus-user"
+        NEXUS_URL = "13.59.148.180:8081"
+        NEXUS_REPOSITORY = "hiring-app"
+        NEXUS_CREDENTIAL_ID = "nexus-creds"
 
-        SCANNER_HOME = tool 'sonar-scanner'
-        SLACK_CHANNEL = "#jenkins-integration"
+        SONAR_HOST_URL = "http://13.59.148.180:9000"
     }
 
     stages {
 
-        stage("Clone Code") {
+        stage("Checkout Code") {
             steps {
-                git 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
+                git branch: 'feature-1.1',
+                url: 'https://github.com/betawins/sabear_simplecutomerapp.git'
             }
         }
 
-        stage("Maven Build") {
+        stage("Build Application") {
             steps {
-                sh 'mvn clean install -Dmaven.test.failure.ignore=true'
+                sh "mvn clean package -DskipTests"
             }
         }
 
         stage("SonarQube Analysis") {
             steps {
-                withSonarQubeEnv('sonarqube-server') {
+                withSonarQubeEnv('sonarqube') {
                     sh """
-                    ${SCANNER_HOME}/bin/sonar-scanner \
-                    -Dsonar.projectKey=Sabear \
-                    -Dsonar.projectName=Sabear \
-                    -Dsonar.sources=src \
-                    -Dsonar.exclusions=**/*.java
+                    mvn sonar:sonar \
+                    -Dsonar.projectKey=sabear-customer-app \
+                    -Dsonar.host.url=${SONAR_HOST_URL}
                     """
                 }
             }
         }
 
-        stage("Publish to Nexus") {
+        stage("Quality Gate Check") {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage("Publish Artifact to Nexus") {
             steps {
                 script {
-                    def pom = readMavenPom file: "pom.xml"
-                    def files = findFiles(glob: "target/*.${pom.packaging}")
 
-                    if (files.length == 0) {
-                        error "No artifact found in target directory"
-                    }
+                    def artifactPath = "target/SimpleCustomerApp.war"
 
-                    def artifactPath = files[0].path
-                    echo "Uploading artifact: ${artifactPath}"
+                    if (fileExists(artifactPath)) {
 
-                    nexusArtifactUploader(
-                        nexusVersion: NEXUS_VERSION,
-                        protocol: NEXUS_PROTOCOL,
-                        nexusUrl: NEXUS_URL,
-                        repository: NEXUS_REPOSITORY,
-                        credentialsId: NEXUS_CREDENTIAL_ID,
-                        groupId: pom.groupId,
-                        artifactId: pom.artifactId,
-                        version: pom.version,
-                        artifacts: [
-                            [file: artifactPath, type: pom.packaging]
-                        ]
-                    )
-                }
-            }
-        }
+                        nexusArtifactUploader(
+                            nexusVersion: "nexus3",
+                            protocol: "http",
+                            nexusUrl: NEXUS_URL,
+                            groupId: "com.javatpoint",
+                            version: "${BUILD_NUMBER}",
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                [
+                                    artifactId: "SimpleCustomerApp",
+                                    classifier: '',
+                                    file: artifactPath,
+                                    type: "war"
+                                ]
+                            ]
+                        )
 
-        stage("Deploy to Tomcat") {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'tomcat',
-                    usernameVariable: 'TOMCAT_USER',
-                    passwordVariable: 'TOMCAT_PASS'
-                )]) {
+                        echo "Artifact Uploaded Successfully!"
 
-                    script {
-                        def warFile = sh(
-                            script: "ls target/*.war | head -n 1",
-                            returnStdout: true
-                        ).trim()
-
-                        echo "Deploying ${warFile} to Tomcat..."
-
-                        sh """
-                        curl -u $TOMCAT_USER:$TOMCAT_PASS \
-                        -T ${warFile} \
-                        "http://44.199.202.221:8080/manager/text/deploy?path=/simplecustomerapp&update=true"
-                        """
+                    } else {
+                        error "WAR file not found!"
                     }
                 }
             }
         }
 
-        stage("Slack Notification") {
-            steps {
-                slackSend(
-                    channel: SLACK_CHANNEL,
-                    color: "#36a64f",
-                    message: "✅ *SimpleCustomerApp* deployed successfully\nJob: ${JOB_NAME}\nBuild: ${BUILD_NUMBER}"
-                )
-            }
-        }
     }
 
     post {
+        success {
+            echo "Pipeline Completed Successfully"
+        }
+
         failure {
-            slackSend(
-                channel: SLACK_CHANNEL,
-                color: "danger",
-                message: "❌ Pipeline FAILED\nJob: ${JOB_NAME}\nBuild: ${BUILD_NUMBER}"
-            )
+            echo "Pipeline Failed"
         }
     }
 }
