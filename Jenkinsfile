@@ -18,7 +18,7 @@ pipeline {
         stage("Checkout Code") {
             steps {
                 git branch: 'feature-1.1',
-                url: 'https://github.com/betawins/sabear_simplecutomerapp.git'
+                url: 'https://github.com/Waseema761/sabear_simplecutomerapp.git'
             }
         }
 
