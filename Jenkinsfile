@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
 
-                    def artifactPath = "target/SimpleCustomerApp.war"
+                    def artifactPath = "target/SimpleCustomerApp-3-SNAPSHOT.war"
 
                     if (fileExists(artifactPath)) {
 
