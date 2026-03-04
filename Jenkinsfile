@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         NEXUS_URL = "13.59.148.180:8081"
-        NEXUS_REPOSITORY = "hiring-app"
+        NEXUS_REPOSITORY = "hiring-app-snapshot"
         NEXUS_CREDENTIAL_ID = "nexus-creds"
 
         SONAR_HOST_URL = "http://13.59.148.180:9000"
