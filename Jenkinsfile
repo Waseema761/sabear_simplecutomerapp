@@ -24,21 +24,27 @@ pipeline {
             }
         }
 
-        stage("Build Application") {
-            steps {
-                sh "mvn clean package -DskipTests"
-            }
-        }
+        stage("Build and Scan Parallel") {
+            parallel {
 
-        stage("SonarQube Analysis") {
-            steps {
-                withSonarQubeEnv('sonarqube') {
-                    sh """
-                    mvn sonar:sonar \
-                    -Dsonar.projectKey=sabear-customer-app \
-                    -Dsonar.host.url=${SONAR_HOST_URL}
-                    """
+                stage("Build Application") {
+                    steps {
+                        sh "mvn clean package -DskipTests"
+                    }
                 }
+
+                stage("SonarQube Analysis") {
+                    steps {
+                        withSonarQubeEnv('sonarqube') {
+                            sh """
+                            mvn sonar:sonar \
+                            -Dsonar.projectKey=sabear-customer-app \
+                            -Dsonar.host.url=${SONAR_HOST_URL}
+                            """
+                        }
+                    }
+                }
+
             }
         }
 
