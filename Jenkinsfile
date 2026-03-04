@@ -48,40 +48,43 @@ pipeline {
             }
         }
 
-        stage("Publish Artifact to Nexus") {
-            steps {
-                script {
+       stage("Publish Artifact to Nexus") {
+    steps {
+        script {
 
-                    def artifactPath = "target/SimpleCustomerApp-3-SNAPSHOT.war"
+            def pom = readMavenPom file: "pom.xml"
+            def files = findFiles(glob: "target/*.${pom.packaging}")
 
-                    if (fileExists(artifactPath)) {
+            if (files.length > 0) {
 
-                        nexusArtifactUploader(
-                            nexusVersion: "nexus3",
-                            protocol: "http",
-                            nexusUrl: NEXUS_URL,
-                            groupId: "com.javatpoint",
-                            version: "${BUILD_NUMBER}",
-                            repository: NEXUS_REPOSITORY,
-                            credentialsId: NEXUS_CREDENTIAL_ID,
-                            artifacts: [
-                                [
-                                    artifactId: "SimpleCustomerApp",
-                                    classifier: '',
-                                    file: artifactPath,
-                                    type: "war"
-                                ]
-                            ]
-                        )
+                def artifactPath = files[0].path
 
-                        echo "Artifact Uploaded Successfully!"
+                nexusArtifactUploader(
+                    nexusVersion: "nexus3",
+                    protocol: "http",
+                    nexusUrl: "13.59.148.180:8081",
+                    groupId: pom.groupId,
+                    version: pom.version,
+                    repository: "hiring-app",
+                    credentialsId: "nexus-creds",
+                    artifacts: [
+                        [
+                            artifactId: pom.artifactId,
+                            classifier: '',
+                            file: artifactPath,
+                            type: pom.packaging
+                        ]
+                    ]
+                )
 
-                    } else {
-                        error "WAR file not found!"
-                    }
-                }
+                echo "Artifact uploaded successfully!"
+
+            } else {
+                error "No artifact found in target folder!"
             }
         }
+    }
+}
 
     }
 
